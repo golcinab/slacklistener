@@ -2,6 +2,9 @@
 var common = require ('../common/common');
 var util = require('util');
 
+var proxiedRequestTransport = require('@slack/client/lib/clients/transports/request.js').proxiedRequestTransport;
+var wsTransport = require('@slack/client/lib/clients/transports/ws');
+
 var RtmClient = require('@slack/client').RtmClient;
 var token = common.config().slack_token || '';
 
@@ -9,7 +12,15 @@ var rtm = new RtmClient(
   common.config().slack_token || '',
   {
     logLevel: common.config().loglevel,
-    proxyUrl: 'http://10.110.8.42:8080'
+    transport: proxiedRequestTransport('http://10.110.8.42:8080'),
+    socketFn: function(socketUrl) {
+        return wsTransport(socketUrl, {
+            proxyURL: 'http://10.110.8.42:8080',
+            // there's a mistake in transport/ws.js that tries to use both "proxyURL" and "proxyUrl"
+            // so just submit both options for now as a temporary workaround.
+            proxyUrl: 'http://10.110.8.42:8080'
+        });
+    }
   }
 );
 

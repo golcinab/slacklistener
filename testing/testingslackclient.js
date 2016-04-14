@@ -11,7 +11,7 @@ var token = common.config().slack_token || '';
 var rtm = new RtmClient(
   common.config().slack_token || '',
   {
-    logLevel: 'debug',
+    logLevel: common.config().loglevel,
     transport: proxiedRequestTransport('http://10.110.8.42:8080'),
     socketFn: function(socketUrl) {
         return wsTransport(socketUrl, {
